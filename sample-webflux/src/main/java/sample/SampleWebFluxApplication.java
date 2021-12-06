@@ -27,12 +27,12 @@ import reactor.core.publisher.Mono;
 
 @SpringBootApplication(proxyBeanMethods = false)
 @RestController
-public class SampleApplication {
+public class SampleWebFluxApplication {
 
     private static final String SAMPLE_CHANNEL = "sample:events";
 
     public static void main(String[] args) {
-        SpringApplication.run(SampleApplication.class, args);
+        SpringApplication.run(SampleWebFluxApplication.class, args);
     }
 
     @Autowired

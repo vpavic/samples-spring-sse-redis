@@ -1,1 +1,3 @@
-rootProject.name = "sample-spring-webflux-sse"
+rootProject.name = "samples-spring-sse-redis"
+
+include("sample-webflux")

@@ -1,1 +1,1 @@
-= Sample: Spring WebFlux SSE
+= Samples: Spring Server-Sent Events with Redis
