@@ -38,7 +38,7 @@ public class SampleWebFluxApplication {
     @Autowired
     private ReactiveRedisOperations<String, Event> eventRedisOperations;
 
-    @PostMapping("/events")
+    @PostMapping(path = "/events")
     Mono<Map<String, Long>> createEvent() {
         return this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL, Event.generate())
                 .map(count -> Map.of("subscriberCount", count));
