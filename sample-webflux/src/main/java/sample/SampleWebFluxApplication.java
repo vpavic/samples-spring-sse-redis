@@ -20,6 +20,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -29,7 +30,7 @@ import reactor.core.publisher.Mono;
 @RestController
 public class SampleWebFluxApplication {
 
-    private static final String SAMPLE_CHANNEL = "sample:events";
+    private static final String SAMPLE_CHANNEL_PREFIX = "sample:topics:";
 
     public static void main(String[] args) {
         SpringApplication.run(SampleWebFluxApplication.class, args);
@@ -38,15 +39,15 @@ public class SampleWebFluxApplication {
     @Autowired
     private ReactiveRedisOperations<String, Event> eventRedisOperations;
 
-    @PostMapping(path = "/events")
-    Mono<Map<String, Long>> createEvent() {
-        return this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL, Event.generate())
+    @PostMapping(path = "/topics/{name:[a-z]{2}}")
+    Mono<Map<String, Long>> createEvent(@PathVariable String name) {
+        return this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL_PREFIX + name, Event.generate())
                 .map(count -> Map.of("subscriberCount", count));
     }
 
-    @GetMapping(path = "/events")
-    Flux<ServerSentEvent<Event>> getEvents() {
-        return this.eventRedisOperations.listenToChannel(SAMPLE_CHANNEL)
+    @GetMapping(path = "/topics/{name:[a-z]{2}}")
+    Flux<ServerSentEvent<Event>> getEvents(@PathVariable String name) {
+        return this.eventRedisOperations.listenToChannel(SAMPLE_CHANNEL_PREFIX + name)
                 .map(ReactiveSubscription.Message::getMessage)
                 .map(event -> ServerSentEvent.builder(event).id(event.id.toString()).event(event.type).build())
                 .mergeWith(Flux.interval(Duration.ZERO, Duration.ofSeconds(15L))
