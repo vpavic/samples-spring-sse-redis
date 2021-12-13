@@ -1,6 +1,7 @@
 package sample;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,6 +16,8 @@ import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -39,6 +42,9 @@ public class SampleMvcReactiveApplication {
     @Autowired
     private ReactiveRedisOperations<String, Event> eventRedisOperations;
 
+    @Autowired
+    private ReactiveRedisMessageListenerContainer redisMessageListenerContainer;
+
     @PostMapping(path = "/topics/{name:[a-z]{2}}")
     Mono<Map<String, Long>> createEvent(@PathVariable String name) {
         return this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL_PREFIX + name, Event.generate())
@@ -46,8 +52,10 @@ public class SampleMvcReactiveApplication {
     }
 
     @GetMapping(path = "/topics/{name:[a-z]{2}}")
-    Flux<ServerSentEvent<Event>> getEvent(@PathVariable String name) {
-        return this.eventRedisOperations.listenToChannel(SAMPLE_CHANNEL_PREFIX + name)
+    Flux<ServerSentEvent<Event>> getEvents(@PathVariable String name) {
+        return this.redisMessageListenerContainer.receive(List.of(ChannelTopic.of(SAMPLE_CHANNEL_PREFIX + name)),
+                        this.eventRedisOperations.getSerializationContext().getStringSerializationPair(),
+                        this.eventRedisOperations.getSerializationContext().getValueSerializationPair())
                 .map(ReactiveSubscription.Message::getMessage)
                 .map(event -> ServerSentEvent.builder(event).id(event.id.toString()).event(event.type).build())
                 .mergeWith(Flux.interval(Duration.ZERO, Duration.ofSeconds(15L))
@@ -88,6 +96,12 @@ public class SampleMvcReactiveApplication {
                             .hashKey(RedisSerializer.string())
                             .hashValue(jsonRedisSerializer)
                             .build());
+        }
+
+        @Bean
+        ReactiveRedisMessageListenerContainer redisMessageListenerContainer(
+                ReactiveRedisConnectionFactory redisConnectionFactory) {
+            return new ReactiveRedisMessageListenerContainer(redisConnectionFactory);
         }
 
     }
