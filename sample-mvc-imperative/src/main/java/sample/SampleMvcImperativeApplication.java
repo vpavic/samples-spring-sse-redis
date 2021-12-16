@@ -55,12 +55,13 @@ public class SampleMvcImperativeApplication {
     @PostMapping(path = "/topics/{name:[a-z]{2}}")
     void createEvent(@PathVariable String name) {
         // https://github.com/spring-projects/spring-data-redis/issues/2209
-        this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL_PREFIX + name, Event.generate());
+        this.eventRedisOperations.convertAndSend(getChannelName(name), Event.generate());
     }
 
     @GetMapping(path = "/topics/{name:[a-z]{2}}")
-    SseEmitter getEvents(@PathVariable String name) {
+    SseEmitter getEvents(@PathVariable String name) throws IOException {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        emitter.send(SseEmitter.event().comment("subscribed"));
         emitters.add(emitter);
         MessageListener messageListener = (message, pattern) -> {
             Event event = serialize(message);
@@ -71,8 +72,7 @@ public class SampleMvcImperativeApplication {
                 emitters.remove(emitter);
             }
         };
-        this.redisMessageListenerContainer.addMessageListener(messageListener,
-                ChannelTopic.of(SAMPLE_CHANNEL_PREFIX + name));
+        this.redisMessageListenerContainer.addMessageListener(messageListener, ChannelTopic.of(getChannelName(name)));
         emitter.onCompletion(() -> {
             emitters.remove(emitter);
             this.redisMessageListenerContainer.removeMessageListener(messageListener);
@@ -80,7 +80,11 @@ public class SampleMvcImperativeApplication {
         return emitter;
     }
 
-    @Scheduled(fixedRateString = "PT15S")
+    private static String getChannelName(String topic) {
+        return SAMPLE_CHANNEL_PREFIX + topic;
+    }
+
+    @Scheduled(fixedRateString = "PT30S")
     void keepAlive() {
         List<SseEmitter> deadEmitters = new ArrayList<>();
         emitters.forEach(emitter -> {

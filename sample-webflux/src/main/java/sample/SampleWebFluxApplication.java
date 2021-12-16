@@ -47,19 +47,24 @@ public class SampleWebFluxApplication {
 
     @PostMapping(path = "/topics/{name:[a-z]{2}}")
     Mono<Map<String, Long>> createEvent(@PathVariable String name) {
-        return this.eventRedisOperations.convertAndSend(SAMPLE_CHANNEL_PREFIX + name, Event.generate())
+        return this.eventRedisOperations.convertAndSend(getChannelName(name), Event.generate())
                 .map(count -> Map.of("subscriberCount", count));
     }
 
     @GetMapping(path = "/topics/{name:[a-z]{2}}")
     Flux<ServerSentEvent<Event>> getEvents(@PathVariable String name) {
-        return this.redisMessageListenerContainer.receive(List.of(ChannelTopic.of(SAMPLE_CHANNEL_PREFIX + name)),
-                        this.eventRedisOperations.getSerializationContext().getStringSerializationPair(),
-                        this.eventRedisOperations.getSerializationContext().getValueSerializationPair())
-                .map(ReactiveSubscription.Message::getMessage)
-                .map(event -> ServerSentEvent.builder(event).id(event.id.toString()).event(event.type).build())
-                .mergeWith(Flux.interval(Duration.ZERO, Duration.ofSeconds(15L))
-                        .map(i -> ServerSentEvent.<Event>builder().comment("keepalive").build()));
+        return Mono.just(ServerSentEvent.<Event>builder().comment("subscribed").build())
+                .mergeWith(Flux.interval(Duration.ofSeconds(30L))
+                        .map(i -> ServerSentEvent.<Event>builder().comment("keepalive").build()))
+                .mergeWith(this.redisMessageListenerContainer.receive(List.of(ChannelTopic.of(getChannelName(name))),
+                                this.eventRedisOperations.getSerializationContext().getStringSerializationPair(),
+                                this.eventRedisOperations.getSerializationContext().getValueSerializationPair())
+                        .map(ReactiveSubscription.Message::getMessage)
+                        .map(event -> ServerSentEvent.builder(event).id(event.id.toString()).event(event.type).build()));
+    }
+
+    private static String getChannelName(String topic) {
+        return SAMPLE_CHANNEL_PREFIX + topic;
     }
 
     static class Event {
