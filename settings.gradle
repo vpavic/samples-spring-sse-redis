@@ -1,5 +1,6 @@
 rootProject.name = "samples-spring-sse-redis"
 
+includeBuild("sample-build-conventions")
 include("sample-mvc-imperative")
 include("sample-mvc-reactive")
 include("sample-webflux")

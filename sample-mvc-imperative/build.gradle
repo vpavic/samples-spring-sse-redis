@@ -1,18 +1,8 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("java")
+    id("sample.java-conventions")
     id("org.springframework.boot").version("2.6.1")
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
@@ -24,8 +14,4 @@ dependencies {
     implementation("redis.clients:jedis")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType(Test) {
-    useJUnitPlatform()
 }
