@@ -1,1 +1,70 @@
 = Samples: Spring Server-Sent Events with Redis
+
+image:https://github.com/vpavic/samples-spring-sse-redis/actions/workflows/build.yml/badge.svg["Build", link="https://github.com/vpavic/samples-spring-sse-redis/actions/workflows/build.yml"]
+
+This repository contains sample applications that showcase Spring Framework's support for https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events[server-sent events] backed by https://redis.io/topics/pubsub[Redis Pub/Sub].
+
+The name of each sample application contains the web stack it's based on, and the data access paradigm is uses to interact with Redis.
+Below is the list of all the provided sample applications:
+
+* `sample-mvc-imperative`: Spring MVC Sample with Imperative Redis
+* `sample-mvc-reactive`: Spring MVC Sample with Reactive Redis
+* `sample-webflux`: Spring WebFlux Sample
+
+== Getting Started
+
+=== Requirements
+
+Java 11 is required to run the samples.
+
+The project is built using Gradle and uses https://docs.gradle.org/current/userguide/gradle_wrapper.html[Gradle Wrapper] to take care of downloading the appropriate Gradle version.
+
+=== Running the Samples
+
+Each sample is a Spring Boot based application that can be run using:
+
+* using the `bootRun` task of the appropriate sample application
+* from your IDE by running sample application's main class
+
+By default, all samples start web server on port `8080` and attempt to connect to Redis running locally at port `6379`.
+
+Also, all samples expose the following two HTTP endpoints:
+
+* `POST /topics/{name:[a-z]{2}}`: generates an events that's published to Redis channel
+* `GET /topics/{name:[a-z]{2}}`: receives the server-sent events by subscribing to Redis channel
+
+==== Spring MVC Sample with Imperative Redis
+
+This sample uses Spring MVC and a traditional imperative Redis using Jedis driver.
+
+[source,sh]
+----
+$ ./gradlew :sample-mvc-imperative:bootRun
+----
+
+==== Spring MVC Sample with Reactive Redis
+
+This sample uses Spring MVC combined with reactive Redis using Lettuce driver.
+
+[source,sh]
+----
+$ ./gradlew :sample-mvc-reactive:bootRun
+----
+
+==== Spring WebFlux Sample
+
+This sample uses Spring WebFlux, naturally combined with reactive Redis using Lettuce driver.
+
+[source,sh]
+----
+$ ./gradlew :sample-webflux:bootRun
+----
+
+=== Building from Source
+
+The project can be built the `build` task:
+
+[source,sh]
+----
+$ ./gradlew build
+----
