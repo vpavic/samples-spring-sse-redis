@@ -2,13 +2,13 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id("sample.java-conventions")
-    id("org.springframework.boot").version("2.6.1")
+    alias(libs.plugins.spring.boot)
 }
 
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation(libs.spring.boot.starter.webflux)
+    implementation(libs.spring.boot.starter.data.redis.reactive)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(libs.spring.boot.starter.test)
 }

@@ -10,8 +10,14 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = "https://repo.spring.io/milestone/" }
+    maven { url = "https://repo.spring.io/snapshot/" }
 }
 
-tasks.withType(Test) {
+dependencies {
+    implementation(platform(libs.spring.boot.dependencies))
+}
+
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
