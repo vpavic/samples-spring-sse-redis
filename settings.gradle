@@ -21,5 +21,3 @@ includeBuild("sample-build-conventions")
 include("sample-mvc-imperative")
 include("sample-mvc-reactive")
 include("sample-webflux")
-
-enableFeaturePreview("VERSION_CATALOGS")
