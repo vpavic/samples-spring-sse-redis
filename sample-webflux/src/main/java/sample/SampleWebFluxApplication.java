@@ -1,7 +1,6 @@
 package sample;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,8 +15,6 @@ import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -42,9 +39,6 @@ public class SampleWebFluxApplication {
     @Autowired
     private ReactiveRedisOperations<String, Event> eventRedisOperations;
 
-    @Autowired
-    private ReactiveRedisMessageListenerContainer redisMessageListenerContainer;
-
     @PostMapping(path = "/topics/{name:[a-z]{2}}")
     Mono<Map<String, Long>> createEvent(@PathVariable String name) {
         return this.eventRedisOperations.convertAndSend(getChannelName(name), Event.generate())
@@ -56,9 +50,7 @@ public class SampleWebFluxApplication {
         return Mono.just(ServerSentEvent.<Event>builder().comment("subscribed").build())
                 .mergeWith(Flux.interval(Duration.ofSeconds(30L))
                         .map(i -> ServerSentEvent.<Event>builder().comment("keepalive").build()))
-                .mergeWith(this.redisMessageListenerContainer.receive(List.of(ChannelTopic.of(getChannelName(name))),
-                                this.eventRedisOperations.getSerializationContext().getStringSerializationPair(),
-                                this.eventRedisOperations.getSerializationContext().getValueSerializationPair())
+                .mergeWith(this.eventRedisOperations.listenToChannel(getChannelName(name))
                         .map(ReactiveSubscription.Message::getMessage)
                         .map(event -> ServerSentEvent.builder(event).id(event.id.toString()).event(event.type).build()));
     }
@@ -101,12 +93,6 @@ public class SampleWebFluxApplication {
                             .hashKey(RedisSerializer.string())
                             .hashValue(jsonRedisSerializer)
                             .build());
-        }
-
-        @Bean
-        ReactiveRedisMessageListenerContainer redisMessageListenerContainer(
-                ReactiveRedisConnectionFactory redisConnectionFactory) {
-            return new ReactiveRedisMessageListenerContainer(redisConnectionFactory);
         }
 
     }
