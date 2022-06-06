@@ -22,16 +22,7 @@ jobs:
         with:
           distribution: zulu
           java-version: ${{ matrix.java }}
-
-      - name: Cache Gradle Packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-${{ matrix.java }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.java }}-gradle-
+          cache: gradle
 
       - name: Run Build
         run: ./gradlew check --stacktrace
