@@ -1,5 +1,5 @@
 [versions]
-spring-boot = "2.7.0"
+spring-boot = "2.7.1"
 
 [libraries]
 # Spring Boot
