@@ -4,12 +4,11 @@ image:https://github.com/vpavic/samples-spring-sse-redis/actions/workflows/build
 
 This repository contains sample applications that showcase Spring Framework's support for https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events[server-sent events] backed by https://redis.io/topics/pubsub[Redis Pub/Sub].
 
-The name of each sample application contains the web stack it's based on, and the data access paradigm is uses to interact with Redis.
-Below is the list of all the provided sample applications:
+The name of each sample application tells the web stack it's based on, and optionally the data access paradigm it uses to interact with Redis:
 
-* `sample-mvc-imperative`: Spring MVC Sample with Imperative Redis
-* `sample-mvc-reactive`: Spring MVC Sample with Reactive Redis
-* `sample-webflux`: Spring WebFlux Sample
+* `sample-mvc-imperative`: Spring MVC Sample with Imperative Spring Data Redis
+* `sample-mvc-reactive`: Spring MVC Sample with Reactive Spring Data Redis
+* `sample-webflux`: Spring WebFlux Sample (with Reactive Spring Data Redis)
 
 == Getting Started
 
@@ -21,17 +20,35 @@ The project is built using Gradle and uses https://docs.gradle.org/current/userg
 
 === Running the Samples
 
-Each sample is a Spring Boot based application that can be run using:
+Each sample is a Spring Boot based application that can be started:
 
 * using the `bootRun` task of the appropriate sample application
-* from your IDE by running sample application's main class
+* from IDE by running sample application's main class
 
 By default, all samples start web server on port `8080` and attempt to connect to Redis running locally at port `6379`.
+In order to change those defaults, use appropriate Spring Boot configuration properties.
 
-Also, all samples expose the following two HTTP endpoints:
+All the samples expose the following two HTTP endpoints:
 
-* `POST /topics/{name:[a-z]{2}}`: generates an events that's published to Redis channel
-* `GET /topics/{name:[a-z]{2}}`: receives the server-sent events by subscribing to Redis channel
+* `POST /topics/{name:[a-z]{2}}`
++
+Generates an event and publishes it to the specified Redis channel.
+For example, the following request will result in event being published to channel named `aa`:
++
+[source,sh]
+----
+$ curl -s -X POST http://localhost:8080/topics/aa
+----
+
+* `GET /topics/{name:[a-z]{2}}`
++
+Subscribes to server-sent events published to the specified Redis channel.
+The following request will subscribe to events published to channel named `aa`:
++
+[source,sh]
+----
+$ curl -N http://localhost:8080/topics/aa
+----
 
 ==== Spring MVC Sample with Imperative Redis
 
