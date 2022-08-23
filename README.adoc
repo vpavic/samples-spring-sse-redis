@@ -85,3 +85,11 @@ The project can be built the `build` task:
 ----
 $ ./gradlew build
 ----
+
+== Related Issues
+
+- https://github.com/spring-projects/spring-data-redis/issues/2209[spring-projects/spring-data-redis#2209]
+- https://github.com/spring-projects/spring-data-redis/issues/2229[spring-projects/spring-data-redis#2229]
+- https://github.com/spring-projects/spring-data-redis/issues/2386[spring-projects/spring-data-redis#2386]
+- https://github.com/lettuce-io/lettuce-core/issues/705[lettuce-io/lettuce-core#705]
+- https://github.com/cloudfoundry/java-buildpack-memory-calculator/issues/20[cloudfoundry/java-buildpack-memory-calculator#20]
