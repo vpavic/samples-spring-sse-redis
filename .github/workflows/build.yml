@@ -1,9 +1,17 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - '**'
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,12 +25,14 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
 
-      - name: Configure JDK
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: ${{ matrix.java }}
-          cache: gradle
 
-      - name: Run Build
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Run Checks
         run: ./gradlew check --stacktrace
