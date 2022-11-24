@@ -3,6 +3,7 @@ package sample;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -53,9 +54,9 @@ public class SampleMvcImperativeApplication {
     private ObjectMapper objectMapper;
 
     @PostMapping(path = "/topics/{name:[a-z]{2}}")
-    void createEvent(@PathVariable String name) {
-        // https://github.com/spring-projects/spring-data-redis/issues/2209
-        this.eventRedisOperations.convertAndSend(getChannelName(name), Event.generate());
+    Map<String, Long> createEvent(@PathVariable String name) {
+        Long count = this.eventRedisOperations.convertAndSend(getChannelName(name), Event.generate());
+        return Map.of("subscriberCount", count);
     }
 
     @GetMapping(path = "/topics/{name:[a-z]{2}}")
@@ -132,8 +133,8 @@ public class SampleMvcImperativeApplication {
         @Bean
         RedisOperations<String, Event> eventRedisOperations(RedisConnectionFactory redisConnectionFactory,
                 ObjectMapper objectMapper) {
-            Jackson2JsonRedisSerializer<Event> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Event.class);
-            jsonRedisSerializer.setObjectMapper(objectMapper);
+            Jackson2JsonRedisSerializer<Event> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper,
+                    Event.class);
             RedisTemplate<String, Event> eventRedisTemplate = new RedisTemplate<>();
             eventRedisTemplate.setConnectionFactory(redisConnectionFactory);
             eventRedisTemplate.setKeySerializer(RedisSerializer.string());

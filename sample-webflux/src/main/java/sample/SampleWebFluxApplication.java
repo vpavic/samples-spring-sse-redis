@@ -84,8 +84,8 @@ public class SampleWebFluxApplication {
         @Bean
         ReactiveRedisOperations<String, Event> eventRedisOperations(
                 ReactiveRedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
-            Jackson2JsonRedisSerializer<Event> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Event.class);
-            jsonRedisSerializer.setObjectMapper(objectMapper);
+            Jackson2JsonRedisSerializer<Event> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper,
+                    Event.class);
             return new ReactiveRedisTemplate<>(redisConnectionFactory,
                     RedisSerializationContext.<String, Event>newSerializationContext()
                             .key(RedisSerializer.string())
