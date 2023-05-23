@@ -5,13 +5,13 @@ plugins {
     alias(libs.plugins.spring.boot)
 }
 
-configurations {
-    all {
-        exclude(group: "io.lettuce")
-    }
-}
-
 dependencies {
+    modules {
+        module("io.lettuce:lettuce-core") {
+            replacedBy("redis.clients:jedis")
+        }
+    }
+
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.redis)
