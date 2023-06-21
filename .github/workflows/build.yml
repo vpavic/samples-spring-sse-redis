@@ -3,7 +3,12 @@ name: Build
 on:
   push:
     branches:
-      - '**'
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 concurrency:
   group: build-${{ github.ref }}
@@ -16,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        java: [17, 19]
+        java: [17, 20]
 
     steps:
       - name: Checkout Project
