@@ -1,7 +1,7 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("sample.java-conventions")
+    id("sample.java-convention")
     alias(libs.plugins.spring.boot)
 }
 

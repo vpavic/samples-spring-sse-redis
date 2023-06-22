@@ -21,7 +21,7 @@ pluginManagement {
 
 rootProject.name = "samples-spring-sse-redis"
 
-includeBuild("sample-build-conventions")
+includeBuild("gradle/plugins")
 
 include("sample-mvc-imperative")
 include("sample-mvc-reactive")
